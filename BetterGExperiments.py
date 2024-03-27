@@ -39,11 +39,11 @@ class Coin(simpleGE.Sprite):
             self.reset()
             
 class Game(simpleGE.Scene):
-    def __init__(self, scene):
+    def __init__(self):
         super().__init__()
         self.setImage("white.jpg")
         
-        #self.sndCoin = simpleGE.Sound("pickupCoin.wav")
+        self.sndCoin = simpleGE.Sound("pickupCoin.wav")
         
         self.mario = Mario(self)
         self.coins = []
