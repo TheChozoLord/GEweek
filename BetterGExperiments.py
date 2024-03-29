@@ -26,8 +26,19 @@ class Mario(simpleGE.Sprite):
         self.moveSpeed = 5
         
     def process(self):
+        
+        self.image = pygame.image.load("MarioRun-1.png")
+        
         if self.isKeyPressed(pygame.K_LEFT):
             self.x -= 5
+            self.hold += 1
+            if self.hold == 5:
+                self.hold = 0
+                self.frame += 1
+                if self.frame > 3:
+                    self.frame = 0
+                
+            self.image = pygame.transform.flip(self.marioRun[self.frame], 1, 0)
         if self.isKeyPressed(pygame.K_RIGHT):
             self.x += 5
             self.hold += 1
