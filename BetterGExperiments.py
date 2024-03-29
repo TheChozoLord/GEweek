@@ -10,17 +10,34 @@ import pygame, random, simpleGE
 class Mario(simpleGE.Sprite):
     def __init__(self, scene):
         super().__init__(scene)
-        self.setImage("MarioRun-1.png")
-        self.setSize(50, 50)
+        self.marioRun = []
+        self.marioRun.append(pygame.image.load("MarioRun-1.png"))
+        self.marioRun.append(pygame.image.load("MarioRun-2.png"))
+        self.marioRun.append(pygame.image.load("MarioRun-3.png"))
+        self.marioRun.append(pygame.image.load("MarioRun-4.png"))
+
+        self.image = self.marioRun[0]
+        self.rect = self.image.get_rect()
+        self.frame = 0
+        self.hold = 0
+        
+        self.setSize(50, 75)
         self.position = (320, 400)
         self.moveSpeed = 5
         
     def process(self):
         if self.isKeyPressed(pygame.K_LEFT):
-            self.x -= self.moveSpeed
-        if self.isKeyPressed(pygame.K_LEFT):
-            self.x += self.moveSpeed
-        
+            self.x -= 5
+        if self.isKeyPressed(pygame.K_RIGHT):
+            self.x += 5
+            self.hold += 1
+            if self.hold == 5:
+                self.hold = 0
+                self.frame += 1
+                if self.frame > 3:
+                    self.frame = 0
+                
+            self.image = self.marioRun[self.frame]
             
 class Coin(simpleGE.Sprite):
     def __init__(self, scene):
@@ -56,7 +73,7 @@ class Game(simpleGE.Scene):
     def process(self):
         for coin in self.coins:
             if self.mario.collidesWith(coin):
-                #self.sndCoin.play()
+                self.sndCoin.play()
                 coin.reset()
         
         
