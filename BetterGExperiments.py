@@ -49,7 +49,9 @@ class Mario(simpleGE.Sprite):
                     self.frame = 0
                 
             self.image = self.marioRun[self.frame]
-            
+
+         
+
 class Coin(simpleGE.Sprite):
     def __init__(self, scene):
         super().__init__(scene)
@@ -70,28 +72,116 @@ class Game(simpleGE.Scene):
     def __init__(self):
         super().__init__()
         self.setImage("white.jpg")
+        self.score = 0
+        
+        self.timer = simpleGE.Timer()
+        self.timer.totalTime = 10
+        
+        self.lblScore = simpleGE.Label()
+        self.lblScore.center = (150, 100)
+        
+        
+        self.lblTimeLeft = simpleGE.Label()
+        self.lblTimeLeft.center = (500, 100)
+        self.lblTimeLeft.text = "10"
         
         self.sndCoin = simpleGE.Sound("pickupCoin.wav")
-        
+    
         self.mario = Mario(self)
         self.coins = []
         for i in range(10):
             self.coins.append(Coin(self))
             
-        self.sprites = [self.mario,
+        self.sprites = [self.lblTimeLeft,
+                        self.lblScore,
+                        self.mario,
                         self.coins]
-
+        
     def process(self):
+        self.lblTimeLeft.text = f"{self.timer.getTimeLeft():.2f}"
+        self.lblScore.text = f"{self.score}"
+        
+        if self.timer.getTimeLeft() <= 0:
+            print("Times Up!")
+            self.stop()
+        
         for coin in self.coins:
             if self.mario.collidesWith(coin):
                 self.sndCoin.play()
+                self.score += 1
                 coin.reset()
+    
+class TitleScreen(simpleGE.Scene):
+    def __init__(self, score, highScore):
+        super().__init__()
+        self.setImage("white.jpg")
+        
+        self.response = "P"
         
         
+        self.instructions = simpleGE.MultiLabel()
+        self.instructions.textLines = [
+            "Collect as many coins as you can.",
+            "Move with the left and right arrow keys",
+            "You have ten seconds",
+            "Good Luck"
+            ]
+        
+        self.instructions.center = (320, 240)
+        self.instructions.size = (500, 250)
+        
+        self.prevScore = score
+        self.lblLastScore = simpleGE.Label()
+        self.lblLastScore.text = f"Last Score: {self.prevScore}"
+        self.lblLastScore.center = (320, 400)
+        
+        self.btnPlay = simpleGE.Button()
+        self.btnPlay.text = "Play (up)"
+        self.btnPlay.center = (100, 400)
+        
+        self.btnQuit = simpleGE.Button()
+        self.btnQuit.text = "Quit (down)"
+        self.btnQuit.center = (550, 400)
+        
+        #self.highScore = highScore
+        #self.lblHighScore = simpleGE.Label()
+        #self.lblHighScore.text = f"High Score: {self.highScore}"
+        #self.lblHighScore.center = (320, 100)
+        
+        self.sprites = [self.instructions,
+                        #self.highScore,
+                        self.lblLastScore,
+                        self.btnPlay,
+                        self.btnQuit]
+    def process(self):
+        if self.btnQuit.clicked:
+            self.response = "Quit"
+            self.stop()
+        if self.btnPlay.clicked:
+            self.response = "Play"
+            self.stop()
+        if self.isKeyPressed(pygame.K_UP):
+            self.response = "Play"
+            self.stop()
+        if self.isKeyPressed(pygame.K_DOWN):
+            self.response = "Quit"
+            self.stop()
 
 def main():
-    game = Game()
-    game.start()
+    keepGoing = True
+    score = 0
+    highScore = 0
+    while keepGoing:
+        if score > highScore:
+            score = highScore
+        instructions = TitleScreen(score, highScore)
+        instructions.start()
+        if instructions.response == "Play":
+            game = Game()
+            game.start()
+            score = game.score
+        else:
+            keepGoing = False
 
 if __name__ == "__main__":
     main()
