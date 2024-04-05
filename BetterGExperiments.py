@@ -5,7 +5,7 @@ Created on Tue Mar 26 10:25:48 2024
 @author: owen.merrill
 """
 
-import pygame, random, simpleGE
+import pygame, random, simpleGE, json
 
 class Mario(simpleGE.Sprite):
     def __init__(self, scene):
@@ -102,6 +102,13 @@ class Game(simpleGE.Scene):
         self.lblScore.text = f"{self.score}"
         
         if self.timer.getTimeLeft() <= 0:
+            inFile = open("coinHighScore.json", "r")
+            highScore = json.load(inFile)
+            inFile.close()
+            if self.score > highScore:
+               outFile = open("coinHighScore.json", "w")
+               json.dump(self.score, outFile, indent=2)
+               outFile.close()
             self.stop()
         
         for coin in self.coins:
@@ -115,8 +122,12 @@ class TitleScreen(simpleGE.Scene):
         super().__init__()
         self.setImage("white.jpg")
         
+        inFile = open("coinHighScore.json", "r")
+        highScore = json.load(inFile)
+        inFile.close()
+        
         self.response = "P"
-        self.highScore = 0
+        self.highScore = highScore
         
         self.instructions = simpleGE.MultiLabel()
         self.instructions.textLines = [
@@ -146,15 +157,13 @@ class TitleScreen(simpleGE.Scene):
         self.lblHighScore.text = f"High Score: {self.highScore}"
         self.lblHighScore.center = (320, 100)
         
+        
+        
         self.sprites = [self.instructions,
                         self.lblHighScore,
                         self.lblLastScore,
                         self.btnPlay,
                         self.btnQuit]
-        
-    def highUpdate(self, score):
-        if score > self.highScore:
-            self.highScore = score
                 
     def process(self):
         if self.btnQuit.clicked:
@@ -170,9 +179,6 @@ class TitleScreen(simpleGE.Scene):
             self.response = "Quit"
             self.stop()
             
-    def highUpdate(self, score):
-        if score > self.highScore:
-            self.highScore = score
 
 def main():
     keepGoing = True
