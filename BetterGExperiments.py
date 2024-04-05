@@ -102,7 +102,6 @@ class Game(simpleGE.Scene):
         self.lblScore.text = f"{self.score}"
         
         if self.timer.getTimeLeft() <= 0:
-            print("Times Up!")
             self.stop()
         
         for coin in self.coins:
@@ -112,12 +111,12 @@ class Game(simpleGE.Scene):
                 coin.reset()
     
 class TitleScreen(simpleGE.Scene):
-    def __init__(self, score, highScore):
+    def __init__(self, score):
         super().__init__()
         self.setImage("white.jpg")
         
         self.response = "P"
-        
+        self.highScore = 0
         
         self.instructions = simpleGE.MultiLabel()
         self.instructions.textLines = [
@@ -143,16 +142,20 @@ class TitleScreen(simpleGE.Scene):
         self.btnQuit.text = "Quit (down)"
         self.btnQuit.center = (550, 400)
         
-        #self.highScore = highScore
-        #self.lblHighScore = simpleGE.Label()
-        #self.lblHighScore.text = f"High Score: {self.highScore}"
-        #self.lblHighScore.center = (320, 100)
+        self.lblHighScore = simpleGE.Label()
+        self.lblHighScore.text = f"High Score: {self.highScore}"
+        self.lblHighScore.center = (320, 100)
         
         self.sprites = [self.instructions,
-                        #self.highScore,
+                        self.lblHighScore,
                         self.lblLastScore,
                         self.btnPlay,
                         self.btnQuit]
+        
+    def highUpdate(self, score):
+        if score > self.highScore:
+            self.highScore = score
+                
     def process(self):
         if self.btnQuit.clicked:
             self.response = "Quit"
@@ -166,15 +169,16 @@ class TitleScreen(simpleGE.Scene):
         if self.isKeyPressed(pygame.K_DOWN):
             self.response = "Quit"
             self.stop()
+            
+    def highUpdate(self, score):
+        if score > self.highScore:
+            self.highScore = score
 
 def main():
     keepGoing = True
     score = 0
-    highScore = 0
     while keepGoing:
-        if score > highScore:
-            score = highScore
-        instructions = TitleScreen(score, highScore)
+        instructions = TitleScreen(score)
         instructions.start()
         if instructions.response == "Play":
             game = Game()
